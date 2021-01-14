@@ -11,7 +11,7 @@ import {
   Button,
   Card,
 } from "react-bootstrap";
-import { addToCart } from "../actions/cartActions";
+import { addToCart, removeFromCart } from "../actions/cartActions";
 
 export const CartScreen = ({ match, location, history }) => {
   const dispatch = useDispatch();
@@ -21,7 +21,7 @@ export const CartScreen = ({ match, location, history }) => {
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
   const removeFromCartHandler = (id) => {
-    console.log(id);
+    dispatch(removeFromCart(id));
   };
   useEffect(() => {
     if (productId) {
