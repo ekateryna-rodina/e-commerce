@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import colors from "colors";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
@@ -13,8 +14,14 @@ connectDB();
 // init express
 const app = express();
 
+// allow to accept json in the body
+app.use(express.json());
+
 // route for products
 app.use("/api/products", productRoutes);
+
+// route for user management
+app.use("/api/users", userRoutes);
 
 // handle 404 middleware
 app.use(notFound);
