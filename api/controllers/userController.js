@@ -25,7 +25,7 @@ const authUser = asyncHandler(async (req, res) => {
 });
 
 // @desc Gets user profile
-// @route POST/api/user/profile
+// @route POST/api/users/:id
 // @ access Public
 const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
@@ -39,6 +39,32 @@ const getUserProfile = asyncHandler(async (req, res) => {
   } else {
     res.status(404);
     throw new Error("User not found");
+  }
+});
+
+// @desc Updates user profile
+// @route PUT/api/user/profile
+// @ access Private
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  // update info if it sent with a body
+  user.name = req.body.name || user.name;
+  user.email = req.body.email || user.email;
+  user.password = req.body.password || user.password;
+  console.log(req.body);
+  const updatedUser = await user.save();
+  if (updatedUser) {
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isAdmin: updatedUser.isAdmin,
+      token: generateToken(updatedUser._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error("Bad request");
   }
 });
 
@@ -73,4 +99,4 @@ const register = asyncHandler(async (req, res) => {
   }
 });
 
-export { authUser, getUserProfile, register };
+export { authUser, getUserProfile, register, updateUserProfile };
