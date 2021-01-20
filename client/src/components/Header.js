@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../actions/userActions";
+import { logout } from "../actions/authActions";
 const Header = () => {
   const userLogin = useSelector((state) => state.user);
   const [name, setName] = useState("");

@@ -3,7 +3,10 @@ import { Form, Button, Row, Col } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "../components/Message";
 import { Loader } from "../components/Loader";
-import { getUserProfile, updateUserProfile } from "../actions/userActions";
+import {
+  getBaseUserProfile,
+  updateBaseUserProfile,
+} from "../actions/userDetailsActions";
 import { USER_UPDATE_PROFILE_RESET } from "../constants/types";
 
 const ProfileScreen = ({ location, history }) => {
@@ -33,7 +36,7 @@ const ProfileScreen = ({ location, history }) => {
       history.push("/login");
     } else {
       if (!user) {
-        dispatch(getUserProfile("profile"));
+        dispatch(getBaseUserProfile("profile"));
       } else {
         setName(user.name);
         setEmail(user.email);
@@ -56,7 +59,7 @@ const ProfileScreen = ({ location, history }) => {
     } else if (password !== confirmPassword) {
       setMessageWithMessageTimeout("Passwords do not much");
     } else {
-      dispatch(updateUserProfile({ name, email, password }));
+      dispatch(updateBaseUserProfile({ name, email, password }));
       setTimeout(() => {
         dispatch({ type: USER_UPDATE_PROFILE_RESET });
       }, 5000);
