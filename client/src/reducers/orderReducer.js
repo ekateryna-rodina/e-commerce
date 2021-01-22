@@ -19,7 +19,8 @@ const initialOrderState = {
     shippingPrice: "",
     taxPrice: "",
     total: "",
-    success: false,
+    successPayment: false,
+    loadingPayment: false,
   },
   loading: true,
   error: null,
@@ -63,19 +64,19 @@ export const orderReducer = (state = initialOrderState, action) => {
     case ORDER_PAY_REQUEST:
       return {
         ...state,
-        loading: true,
+        loadingPayment: true,
       };
     case ORDER_PAY_SUCCESS:
       return {
         ...state,
-        success: true,
-        loading: false,
+        successPayment: true,
+        loadingPayment: false,
       };
     case ORDER_PAY_FAIL:
       return {
         ...state,
         error: action.payload,
-        loading: false,
+        loadingPayment: false,
       };
     case ORDER_PAY_RESET:
       return {};

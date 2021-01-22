@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Button,
@@ -11,20 +11,55 @@ import {
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "../components/Message";
-import { getOrderById } from "../actions/orderActions";
+import { getOrderById, payOrder } from "../actions/orderActions";
 import { Loader } from "../components/Loader";
+import axios from "axios";
+import { ORDER_PAY_RESET } from "../constants/types";
+import { PayPalButton } from "react-paypal-button-v2";
 
 export const OrderResultScreen = ({ match }) => {
-  console.log(match.params.id);
+  const [payPalScriptReady, setPayPalScriptReady] = useState(false);
   const orderResult = useSelector((state) => state.order);
-  const { orderInfo, loading, error } = orderResult;
-  console.log(orderInfo);
+
+  const {
+    orderInfo,
+    loading,
+    error,
+    successPayment,
+    loadingPayment,
+  } = orderResult;
   const dispatch = useDispatch();
   const orderId = match.params.id;
 
   useEffect(() => {
-    dispatch(getOrderById(orderId));
-  }, [dispatch]);
+    const renderPayPalScript = async () => {
+      const { data: clientId } = await axios.get("/api/config/paypal");
+      // add paypal script dinamically
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.async = true;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
+      console.log(script.src);
+      script.onLoad = () => {
+        setPayPalScriptReady(true);
+      };
+      document.body.appendChild(script);
+    };
+    if (!orderInfo || successPayment) {
+      dispatch({ type: ORDER_PAY_RESET });
+      dispatch(getOrderById(orderId));
+    } else if (!orderInfo.isPaid) {
+      if (!window.paypal) {
+        renderPayPalScript();
+      } else {
+        setPayPalScriptReady(true);
+      }
+    }
+  }, [dispatch, orderId, successPayment]);
+
+  const successPaymentHandler = (paymentResult) => {
+    dispatch(payOrder(orderId, paymentResult));
+  };
   return error ? (
     <Message variant="danger">{error}</Message>
   ) : loading ? (
@@ -48,34 +83,28 @@ export const OrderResultScreen = ({ match }) => {
                 {orderInfo.shippingAddress.country},{" "}
                 {orderInfo.shippingAddress.postalCode}
               </p>
-              <p>
-                {orderInfo.isDelivered ? (
-                  <Message variant="success">
-                    Delivered on {orderInfo.deliveredAt}
-                  </Message>
-                ) : (
-                  <Message variant="info">
-                    Your order has not been delivered yet
-                  </Message>
-                )}
-              </p>
+              {orderInfo.isDelivered ? (
+                <Message variant="success">
+                  Delivered on {orderInfo.deliveredAt}
+                </Message>
+              ) : (
+                <Message variant="info">
+                  Your order has not been delivered yet
+                </Message>
+              )}
             </ListGroup.Item>
             <ListGroup.Item>
               <h2>Payment method</h2>
               <p>
                 <strong>Method:</strong> {orderInfo.paymentMethod}
               </p>
-              <p>
-                {orderInfo.isPaid ? (
-                  <Message variant="success">
-                    Paid on {orderInfo.paidAt}
-                  </Message>
-                ) : (
-                  <Message variant="info">
-                    Your order has not been payed yet
-                  </Message>
-                )}
-              </p>
+              {orderInfo.isPaid ? (
+                <Message variant="success">Paid on {orderInfo.paidAt}</Message>
+              ) : (
+                <Message variant="info">
+                  Your order has not been payed yet
+                </Message>
+              )}
             </ListGroup.Item>
             <ListGroup.Item>
               <h2>Your items</h2>
@@ -145,6 +174,19 @@ export const OrderResultScreen = ({ match }) => {
                   <Col>${orderInfo.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
+              {!orderInfo.isPaid && (
+                <ListGroup.Item>
+                  {loadingPayment && <Loader />}
+                  {!payPalScriptReady ? (
+                    <Loader />
+                  ) : (
+                    <PayPalButton
+                      amount={orderInfo.totalPrice}
+                      onSuccess={successPaymentHandler}
+                    />
+                  )}
+                </ListGroup.Item>
+              )}
             </ListGroup>
           </Card>
         </Col>

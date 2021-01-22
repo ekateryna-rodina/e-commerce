@@ -27,6 +27,11 @@ app.use("/api/users", userRoutes);
 // route for orders
 app.use("/api/orders", orderRoutes);
 
+// access to paypal configuration
+app.get("/api/config/paypal", (req, res) =>
+  res.send(process.env.PAYPAL_CLIENT_ID)
+);
+
 // handle 404 middleware
 app.use(notFound);
 
