@@ -5,6 +5,7 @@ import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import colors from "colors";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 // enable local variables
 dotenv.config();
@@ -22,6 +23,9 @@ app.use("/api/products", productRoutes);
 
 // route for user management
 app.use("/api/users", userRoutes);
+
+// route for orders
+app.use("/api/orders", orderRoutes);
 
 // handle 404 middleware
 app.use(notFound);

@@ -9,6 +9,7 @@ import {
   USER_UPDATE_PROFILE_RESET,
   SHIPPING_INFO_SAVE_REQUEST,
   SHIPPING_INFO_SAVE_SUCCESS,
+  PAYMENT_METHOD_SAVE_SUCCESS,
 } from "../constants/types";
 const initialBaseProfileState = {
   user: null,
@@ -16,8 +17,18 @@ const initialBaseProfileState = {
   loading: false,
 };
 const initialShippingState = {
-  shippingAddress: null,
+  shippingAddress: {
+    address: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+  },
   loading: false,
+};
+
+const initialPaymentState = {
+  paymentMethod: null,
 };
 
 export const baseUserProfileReducer = (
@@ -86,14 +97,30 @@ export const userShippingDetailsReducer = (
 ) => {
   switch (action.type) {
     case SHIPPING_INFO_SAVE_REQUEST:
+      console.log("request");
       return {
         ...state,
         loading: true,
       };
     case SHIPPING_INFO_SAVE_SUCCESS:
+      console.log("success");
+      console.log(action.payload);
+      return {
+        shippingAddress: action.payload,
+        loading: false,
+      };
+    default:
+      return state;
+  }
+};
+
+export const paymentReducer = (state = initialPaymentState, action) => {
+  switch (action.type) {
+    case PAYMENT_METHOD_SAVE_SUCCESS:
       return {
         ...state,
-        shippingAddress: action.payload,
+        loading: false,
+        paymentMethod: action.payload,
       };
     default:
       return state;
@@ -104,4 +131,5 @@ export default {
   baseUserProfileReducer,
   updateBaseUserProfileReducer,
   userShippingDetailsReducer,
+  paymentReducer,
 };

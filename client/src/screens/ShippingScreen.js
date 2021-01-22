@@ -1,20 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { Form, Button, Row, Col, Container } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { register } from "../actions/authActions";
-import Message from "../components/Message";
-import { Loader } from "../components/Loader";
+import { saveShippingAddress } from "../actions/userDetailsActions";
+import { Checkout } from "../components/Checkout";
 
 export const ShippingScreen = ({ history }) => {
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [state, setState] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [country, setCountry] = useState("");
+  const user = useSelector((state) => state.user);
+  const shippingDetails = useSelector((state) => state.userShippingDetails);
+  const { shippingAddress } = shippingDetails;
+
+  const [address, setAddress] = useState(shippingAddress.address);
+  const [city, setCity] = useState(shippingAddress.city);
+  const [state, setState] = useState(shippingAddress.state);
+  const [postalCode, setPostalCode] = useState(shippingAddress.postalCode);
+  const [country, setCountry] = useState(shippingAddress.country);
+  const [saveDefault, setSaveDefault] = useState(true);
+
+  const dispatch = useDispatch();
 
   const onShippingSubmit = (e) => {
     e.preventDefault();
+    dispatch(
+      saveShippingAddress({
+        address,
+        city,
+        state,
+        country,
+        postalCode,
+        saveDefault,
+      })
+    );
+    // move to payment
+    history.push("/payment");
   };
   return (
     <Container>
@@ -70,6 +87,14 @@ export const ShippingScreen = ({ history }) => {
                 value={postalCode}
                 onChange={(e) => setPostalCode(e.target.value)}
               ></Form.Control>
+            </Form.Group>
+            <Form.Group controlId="saveAddressAsDefault">
+              <Form.Check
+                type="checkbox"
+                label="Save as default"
+                checked={saveDefault}
+                onChange={(e) => setSaveDefault(e.target.value)}
+              />
             </Form.Group>
             <Button type="submit" variant="primary">
               Save and continue
